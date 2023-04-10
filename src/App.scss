@@ -1,7 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap");
+
+.fetching-data {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eff2f5;
+}
 .App {
   text-align: center;
   min-height: 100vh;
   padding-top: 2rem;
+  font-family: "Inter", sans-serif;
+  background-color: #eff2f5;
+
   .recharts-surface {
     width: 100%;
   }
@@ -15,6 +28,15 @@
     display: flex;
     justify-content: flex-end;
     margin-right: 1.5rem;
+    .ant-select-selector {
+      min-width: 100px;
+    }
+  }
+  .stats-wrapper {
+    background-color: #eff2f5;
+    padding: 1rem 2rem;
+    margin: 1rem 1.5rem;
+    padding-right: 0;
   }
   .selected-date-data-wrapper {
     width: 90%;
@@ -25,6 +47,14 @@
       width: 100%;
       margin: 1rem auto;
       font-size: 1rem;
+      background-color: #fafafa;
+      .table-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin: 2rem 0 0;
+        padding: 0.5rem 0.25rem;
+      }
     }
+    padding-bottom: 2rem;
   }
 }

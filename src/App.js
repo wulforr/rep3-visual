@@ -16,7 +16,7 @@ import {
   Line,
   ComposedChart,
 } from "recharts";
-import { Select, Table, Input } from "antd";
+import { Select, Table, Input, Statistic, Card, Col, Row } from "antd";
 import "antd/dist/reset.css";
 import {
   membershipNftQuery,
@@ -24,6 +24,8 @@ import {
   associationBadgeQuery,
 } from "./utils/subgraphQueries";
 import { subgraphFetcher } from "./utils/subgraphFetcher";
+import Lottie from "react-lottie";
+import * as animationData from "./assets/pleaseWait.json";
 
 const { Search } = Input;
 const filterOptions = [
@@ -49,6 +51,7 @@ const columns = [
     title: "Index",
     dataIndex: "index",
     key: "index",
+    width: 100,
   },
   {
     title: "Claimer",
@@ -64,8 +67,18 @@ const columns = [
     title: "TokenId",
     dataIndex: "tokenId",
     key: "tokenId",
+    width: 100,
   },
 ];
+
+const defaultOptions = {
+  loop: true,
+  autoplay: true,
+  animationData: animationData,
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
+};
 
 function App() {
   dayjs.extend(advancedFormat);
@@ -78,6 +91,8 @@ function App() {
   const [searchValue, setSearchValue] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [tableData, setTableData] = useState(null);
+  const [associationBadgeTableData, setAssociationBadgeTableData] =
+    useState(null);
 
   const groupDataByTime = (sortedData) => {
     const timeFormattedData = sortedData?.map((ele) => {
@@ -182,7 +197,6 @@ function App() {
         groupedMembershipNFTs,
         groupedAssociationBadges
       );
-      console.log("ass", mergedArray);
       setSortedChartData(mergedArray);
     };
     if (!fetchedQuery?.current) {
@@ -204,6 +218,7 @@ function App() {
               : 30)
         );
         setFilteredData(temp);
+        setSelectedDateData(null);
       } else {
         setFilteredData(sortedChartData);
       }
@@ -221,12 +236,17 @@ function App() {
         };
       });
       setTableData(temp);
+      const temp2 = selectedDateData?.associationBadges?.map((ele, index) => {
+        return {
+          claimer: ele?.claimer,
+          contractAddress: ele?.contractAddress?.id,
+          tokenId: ele?.tokenID,
+          index: index + 1,
+        };
+      });
+      setAssociationBadgeTableData(temp2);
     }
   }, [selectedDateData]);
-
-  if (!sortedChartData?.length) {
-    return <div>Fetching data please wait</div>;
-  }
 
   const handleFilterChange = (value) => {
     console.log("value", value);
@@ -246,13 +266,52 @@ function App() {
         contractAddress: searchValue,
       }
     );
-    const groupArrays = groupDataByTime(dataAfterSort);
+    const groupedMembershipNFTs = groupDataByTime(dataAfterSort);
 
-    setSortedChartData(groupArrays);
+    const associationBadges = await subgraphFetcher(
+      associationBadgeQuery,
+      "associationBadges",
+      {
+        contractAddress: searchValue,
+      }
+    );
+    const groupedAssociationBadges = groupDataByTime(associationBadges);
+
+    const mergedArray = mergeArrays(
+      groupedMembershipNFTs,
+      groupedAssociationBadges
+    );
+    setSortedChartData(mergedArray);
     setSearchLoading(false);
   };
 
   console.log("selected date data", selectedDateData);
+
+  const numberOfMembershipNfts = filteredData?.reduce((acc, curr) => {
+    return acc + curr?.nftsAmount;
+  }, 0);
+
+  const numberOfAssociationBadges = filteredData?.reduce((acc, curr) => {
+    return acc + curr?.associationBadgesAmount;
+  }, 0);
+
+  const activeDaos = [
+    ...new Set(
+      filteredData
+        ?.reduce((acc, curr) => {
+          return [...acc, ...curr?.nfts, ...curr?.associationBadges];
+        }, [])
+        ?.map((ele) => ele?.contractAddress?.id)
+    ),
+  ];
+
+  if (!sortedChartData?.length) {
+    return (
+      <div className="fetching-data">
+        <Lottie options={defaultOptions} height={200} width={200} />
+      </div>
+    );
+  }
 
   return (
     <div className="App">
@@ -267,7 +326,6 @@ function App() {
           loading={searchLoading}
         />
       </div>
-      {/* <button onClick={searchContract}>Search</button> */}
       <div className="filter-input-wrapper">
         <Select
           options={filterOptions}
@@ -275,6 +333,32 @@ function App() {
           value={selectedFilter}
           size="large"
         />
+      </div>
+
+      <div className="stats-wrapper">
+        <Row gutter={16}>
+          <Col span={8}>
+            <Card bordered={false}>
+              <Statistic
+                title="Membership Badges"
+                value={numberOfMembershipNfts}
+              />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card bordered={false}>
+              <Statistic
+                title="Association Badges"
+                value={numberOfAssociationBadges}
+              />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card bordered={false}>
+              <Statistic title="Active Daos" value={activeDaos?.length} />
+            </Card>
+          </Col>
+        </Row>
       </div>
       <ResponsiveContainer width="100%" height={400}>
         {/* <AreaChart
@@ -346,12 +430,33 @@ function App() {
           <div>
             Total nfts claimed or updated : {selectedDateData?.nftsAmount}{" "}
           </div>
-          {selectedDateData ? (
+          {tableData?.length ? (
             <div className="table-wrapper">
+              <div className="table-title">Membership badges</div>
+
               <Table
                 columns={columns}
                 dataSource={tableData}
                 pagination={false}
+                scroll={{
+                  y: 550,
+                }}
+              />
+            </div>
+          ) : (
+            <></>
+          )}
+
+          {associationBadgeTableData?.length ? (
+            <div className="table-wrapper">
+              <div className="table-title">Association badges</div>
+              <Table
+                columns={columns}
+                dataSource={associationBadgeTableData}
+                pagination={false}
+                scroll={{
+                  y: 550,
+                }}
               />
             </div>
           ) : (
