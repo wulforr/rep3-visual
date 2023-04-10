@@ -37,6 +37,11 @@
     padding: 1rem 2rem;
     margin: 1rem 1.5rem;
     padding-right: 0;
+    .stats-wrapper-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-gap: 1rem;
+    }
   }
   .selected-date-data-wrapper {
     width: 90%;
@@ -56,5 +61,37 @@
       }
     }
     padding-bottom: 2rem;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .App {
+    .search-input-wrapper {
+      width: 90%;
+      margin: 0 auto;
+      min-width: 200px;
+    }
+    .filter-input-wrapper {
+      width: calc(100% - 1.5rem);
+      display: flex;
+      justify-content: flex-end;
+      margin-right: 1rem;
+      margin-top: 1rem;
+      .ant-select-selector {
+        min-width: 100px;
+      }
+    }
+    .stats-wrapper {
+      background-color: #eff2f5;
+      padding: 1rem 0rem;
+      margin: 0 auto;
+      padding-right: 0;
+      width: 90%;
+      .stats-wrapper-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem 0rem;
+      }
+    }
   }
 }

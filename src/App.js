@@ -336,8 +336,14 @@ function App() {
       </div>
 
       <div className="stats-wrapper">
-        <Row gutter={16}>
-          <Col span={8}>
+        <Row gutter={{ xs: 16, lg: 24 }} className="stats-wrapper-row">
+          <Col
+            span={{
+              xs: 24,
+              lg: 8,
+            }}
+            className="stats-col"
+          >
             <Card bordered={false}>
               <Statistic
                 title="Membership Badges"
@@ -345,7 +351,13 @@ function App() {
               />
             </Card>
           </Col>
-          <Col span={8}>
+          <Col
+            span={{
+              xs: 24,
+              lg: 8,
+            }}
+            className="stats-col"
+          >
             <Card bordered={false}>
               <Statistic
                 title="Association Badges"
@@ -353,7 +365,13 @@ function App() {
               />
             </Card>
           </Col>
-          <Col span={8}>
+          <Col
+            span={{
+              xs: 24,
+              lg: 8,
+            }}
+            className="stats-col"
+          >
             <Card bordered={false}>
               <Statistic title="Active Daos" value={activeDaos?.length} />
             </Card>
