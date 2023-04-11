@@ -22,6 +22,7 @@ import {
   membershipNftQuery,
   filterMembershipNftByContractQuery,
   associationBadgeQuery,
+  filterAssociationBadgeByContractQuery,
 } from "./utils/subgraphQueries";
 import { subgraphFetcher } from "./utils/subgraphFetcher";
 import Lottie from "react-lottie";
@@ -269,7 +270,7 @@ function App() {
     const groupedMembershipNFTs = groupDataByTime(dataAfterSort);
 
     const associationBadges = await subgraphFetcher(
-      associationBadgeQuery,
+      filterAssociationBadgeByContractQuery,
       "associationBadges",
       {
         contractAddress: searchValue,
