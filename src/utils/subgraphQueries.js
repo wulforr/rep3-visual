@@ -46,7 +46,7 @@ export const associationBadgeQuery = `
 `;
 
 export const filterAssociationBadgeByContractQuery = `
-  query($lastId: String) {
+  query($contractAddress: String, $lastId: String) {
     associationBadges(first: 1000, where: {contractAddress: $contractAddress, id_gt: $lastId}) {
       contractAddress {
         id

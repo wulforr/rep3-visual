@@ -182,13 +182,36 @@ function App() {
     return mergedArray;
   };
 
+  const separateMintedAndUpgraded = (data) => {
+    const dataMapped = data?.map((ele, index) => {
+      const isFirstElement = data.findIndex(
+        (element) =>
+          element?.contractAddress?.id === ele?.contractAddress?.id &&
+          element?.claimer === ele?.claimer
+      );
+      console.log("is first", index, isFirstElement);
+      return {
+        ...ele,
+        isMembershipMint: isFirstElement === index,
+      };
+    });
+    return dataMapped;
+    // {
+    //   minted: dataMapped?.filter((ele) => ele.isMembershipMint),
+    //   upgraded: dataMapped?.filter((ele) => !ele?.isMembershipMint),
+    // };
+  };
+
   useEffect(() => {
     const fetchChartData = async () => {
       const dataAfterSort = await subgraphFetcher(
         membershipNftQuery,
         "membershipNFTs"
       );
-      const groupedMembershipNFTs = groupDataByTime(dataAfterSort);
+      console.log("data after sort", dataAfterSort);
+      const separated = separateMintedAndUpgraded(dataAfterSort);
+      console.log("sepedksmc", separated);
+      const groupedMembershipNFTs = groupDataByTime(separated);
       const associationBadges = await subgraphFetcher(
         associationBadgeQuery,
         "associationBadges"
@@ -267,7 +290,8 @@ function App() {
         contractAddress: searchValue,
       }
     );
-    const groupedMembershipNFTs = groupDataByTime(dataAfterSort);
+    const separated = separateMintedAndUpgraded(dataAfterSort);
+    const groupedMembershipNFTs = groupDataByTime(separated);
 
     const associationBadges = await subgraphFetcher(
       filterAssociationBadgeByContractQuery,
@@ -288,8 +312,12 @@ function App() {
 
   console.log("selected date data", selectedDateData);
 
-  const numberOfMembershipNfts = filteredData?.reduce((acc, curr) => {
-    return acc + curr?.nftsAmount;
+  const numberOfMembershipMinted = filteredData?.reduce((acc, curr) => {
+    return acc + curr?.nfts?.filter((ele) => ele?.isMembershipMint)?.length;
+  }, 0);
+
+  const numberOfMembershipUpgraded = filteredData?.reduce((acc, curr) => {
+    return acc + curr?.nfts?.filter((ele) => !ele?.isMembershipMint)?.length;
   }, 0);
 
   const numberOfAssociationBadges = filteredData?.reduce((acc, curr) => {
@@ -341,21 +369,35 @@ function App() {
           <Col
             span={{
               xs: 24,
-              lg: 8,
+              lg: 6,
             }}
             className="stats-col"
           >
             <Card bordered={false}>
               <Statistic
                 title="Membership Badges"
-                value={numberOfMembershipNfts}
+                value={numberOfMembershipMinted}
               />
             </Card>
           </Col>
           <Col
             span={{
               xs: 24,
-              lg: 8,
+              lg: 6,
+            }}
+            className="stats-col"
+          >
+            <Card bordered={false}>
+              <Statistic
+                title="Upgraded Badges"
+                value={numberOfMembershipUpgraded}
+              />
+            </Card>
+          </Col>
+          <Col
+            span={{
+              xs: 24,
+              lg: 6,
             }}
             className="stats-col"
           >
@@ -369,7 +411,7 @@ function App() {
           <Col
             span={{
               xs: 24,
-              lg: 8,
+              lg: 6,
             }}
             className="stats-col"
           >
